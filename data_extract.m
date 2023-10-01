@@ -4,7 +4,8 @@ function[bus_data, branch_data] = data_extract()
     %importing bus data
     %data and text data field is created 
     %data field description starts-
-    % -3>>bus type(0-PQ,2-PV,3-Swing)
+    % -3>>bus type(0-PQ,2-PV,3-Swing) -4>> final voltage solution 
+    % -5>>final angle solution
     %-6>> load MW, -7>> load MVAR, -8>>generation MW, -9>>generation MVAR,
     %-10>>KV base, -11>>desired voltage on bus if this is controlling other bus
     %-12>>maximum MVAR, -13>>minimum MVAR, -14>>Shunt conductance G(per unit)

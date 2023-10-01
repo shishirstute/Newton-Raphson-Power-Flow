@@ -53,7 +53,7 @@ function delta = crout_solver(A, b)
     % LUX=B
     % LY = B where UX = Y
     
-    y = zeros(1,n);
+    y = zeros(n,1);
     
     for i = 1:n
         sum =0;
@@ -66,7 +66,7 @@ function delta = crout_solver(A, b)
     %%%backward substitution %%%%%%%
     %getting X
     %UX = Y
-    x = zeros(1,n);
+    x = zeros(n,1);
     for i = n:-1:1
         sum =0;
         for j = i+1:n

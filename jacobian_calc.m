@@ -1,6 +1,8 @@
 % function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
 %     nbus = jacobian_params.nbus;
 function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
+
+% this function returns the jacobian when required arguments are passed
     nbus = jacobian_params.nbus;
     G = jacobian_params.G ;
     B = jacobian_params.B;
@@ -9,7 +11,7 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
     PV_bus = jacobian_params.PV_bus;
     Swing_bus = jacobian_params.Swing_bus;
     PQ_bus = jacobian_params.PQ_bus;
-    V = jacobian_params.V;
+    Voltage = jacobian_params.Voltage;
     Delta = jacobian_params.Delta;
 % 
 % 
@@ -17,7 +19,7 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
 % PV_bus = [4];
 % Swing_bus =[1];
 % PQ_bus = [2 3];
-% V= ones(nbus,1);
+% Voltage= ones(nbus,1);
 % Delta= zeros(nbus,1);
 % Ybus =[
 % 
@@ -33,13 +35,13 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
 
 
 
-    %finding P-calculated
+    %finding P,Q-calculated
     P_calc = zeros(nbus,1);
     Q_calc = zeros(nbus,1);
     for i=1:nbus
         for j=1:nbus
-            P_calc(i) = P_calc(i) + Y_mag(i,j)*V(i)*V(j)*cos(Theta(i,j)+Delta(j)-Delta(i));
-            Q_calc(i) = Q_calc(i) - Y_mag(i,j)*V(i)*V(j)*sin(Theta(i,j)+Delta(j)-Delta(i));
+            P_calc(i) = P_calc(i) + Y_mag(i,j)*Voltage(i)*Voltage(j)*cos(Theta(i,j)+Delta(j)-Delta(i));
+            Q_calc(i) = Q_calc(i) - Y_mag(i,j)*Voltage(i)*Voltage(j)*sin(Theta(i,j)+Delta(j)-Delta(i));
         end
     end
     
@@ -54,9 +56,9 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
             if ~(ismember(i,Swing_bus)| ismember(j,Swing_bus)) 
                 if i==j
                     % -nsb is made to correct index of matrix
-                    J11(i-nsb,j-nsb) = -Q_calc(i) - (V(i)^2 * B(i,i));
+                    J11(i-nsb,j-nsb) = -Q_calc(i) - (Voltage(i)^2 * B(i,i));
                 else
-                    J11(i-nsb,j-nsb) = - Y_mag(i,j)*V(i)*V(j)*sin(Theta(i,j)+Delta(j)-Delta(i));
+                    J11(i-nsb,j-nsb) = - Y_mag(i,j)*Voltage(i)*Voltage(j)*sin(Theta(i,j)+Delta(j)-Delta(i));
                 end
             end
         end
@@ -78,9 +80,9 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
                         % apart of nsv, pv_count is subtracted from index as
                         % index gets lowered as well due to exclusion of PV bus
                         %since rows associated to PV of J21 are reduced, index is decreased by pv_count only in row
-                        J21(i-nsb-pv_count,j-nsb) = P_calc(i) - (V(i)^2 * G(i,i));
+                        J21(i-nsb-pv_count,j-nsb) = P_calc(i) - (Voltage(i)^2 * G(i,i));
                     else
-                        J21(i-nsb-pv_count,j-nsb) = -(Y_mag(i,j)*V(i)*V(j)*cos(Theta(i,j)+Delta(j)-Delta(i)));
+                        J21(i-nsb-pv_count,j-nsb) = -(Y_mag(i,j)*Voltage(i)*Voltage(j)*cos(Theta(i,j)+Delta(j)-Delta(i)));
                     end
                 end
             end
@@ -103,7 +105,7 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
                         if i==j
                             % -nsb, -nsb-pv_count is done in indexing to
                             % arrange indexing
-                            J12(i-nsb,j-nsb-pv_count) = J21(j-nsb-pv_count,i-nsb) + 2*V(i)^2*G(i,i);
+                            J12(i-nsb,j-nsb-pv_count) = J21(j-nsb-pv_count,i-nsb) + 2*Voltage(i)^2*G(i,i);
                         else
                             J12(i-nsb,j-nsb-pv_count) = -J21(j-nsb-pv_count,i-nsb);
                         end
@@ -116,16 +118,20 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
     pv_count_j = 0;
     for j=1:nbus
         if ismember(j,PV_bus)
+            % if pv bus is encountered, don't calculate corresponding
+            % column of J22
             pv_count_j = pv_count_j + 1;
         else
             pv_count_i=0;
             for i = 1:nbus
                 if ~(ismember(i,Swing_bus)| ismember(j,Swing_bus))
                     if ismember(i,PV_bus)
+                        % if pv bus is encountered, don't calculate
+                        % corresponding column of J22
                         pv_count_i=pv_count_i+1;
                     else
                         if i==j
-                            J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = -J11(i-nsb,i-nsb) - 2*V(i)^2*B(i,i); % dimension of v is n              
+                            J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = -J11(i-nsb,i-nsb) - 2*Voltage(i)^2*B(i,i); % dimension of v is n              
                         else
                             J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = J11(i-nsb,j-nsb);
                         end
@@ -136,7 +142,7 @@ function [J11,J12,J21,J22] = jacobian_calc(jacobian_params)
     end
     
     
-    J=[J11 J12; J21 J22]
+    J=[J11 J12; J21 J22];
 end
 
 
