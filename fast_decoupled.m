@@ -1,6 +1,7 @@
 
 function [delta_correct_de, voltage_correct_de] = fast_decoupled(f_d_params)
 
+    % getting parameters
     del_P = f_d_params.del_P;
     del_Q = f_d_params.del_Q;
     B = f_d_params.B;
@@ -10,9 +11,12 @@ function [delta_correct_de, voltage_correct_de] = fast_decoupled(f_d_params)
     
     %% for delta correction
     V_delta = Voltage;
+    % removing swing bus voltages
     V_delta(Swing_bus) = [];
+    % getting mismatch divided by voltage
     del_P_bar = del_P./V_delta;
     B_delta = -B;
+    % getting B_delta(jacobian J11)
     B_delta(Swing_bus,:) = [];
     B_delta(:,Swing_bus) = [];
     delta_correct_de = crout_solver(B_delta,del_P_bar);
