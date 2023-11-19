@@ -108,9 +108,11 @@ function [J11,J12,J21,J22] = jacobian_calc_original(jacobian_params)
                             % -nsb, -nsb-pv_count is done in indexing to
                             % arrange indexing
 
-                            J12(i-nsb,j-nsb-pv_count) = (J21(j-nsb-pv_count,i-nsb) + 2*Voltage(i)^2*G(i,i))/Voltage(i);
+                            J12(i-nsb,j-nsb-pv_count) = (P_calc(i) + Voltage(i)^2*G(i,i))/Voltage(i);
                         else
-                            J12(i-nsb,j-nsb-pv_count) = -J21(j-nsb-pv_count,i-nsb)/Voltage(i);
+                            %J12(i-nsb,j-nsb-pv_count) = -J21(j-nsb-pv_count,i-nsb)/Voltage(j); mistake
+                        
+                            J12(i-nsb,j-nsb-pv_count) = Y_mag(i,j)*Voltage(i)*cos(Theta(i,j)+Delta(j)-Delta(i));
                         end
                     end
                 end
@@ -134,9 +136,10 @@ function [J11,J12,J21,J22] = jacobian_calc_original(jacobian_params)
                         pv_count_i=pv_count_i+1;
                     else
                         if i==j
-                            J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = (-J11(i-nsb,i-nsb) - 2*Voltage(i)^2*B(i,i))/Voltage(i); % dimension of v is n              
+                            J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = (Q_calc(i) - Voltage(i)^2*B(i,i))/Voltage(i);              
                         else
-                            J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = J11(i-nsb,j-nsb)/Voltage(i);
+                          
+                            J22(i-nsb-pv_count_i,j-nsb-pv_count_j) = -Y_mag(i,j)*Voltage(i)*sin(Theta(i,j)+Delta(j)-Delta(i));
                         end
                     end
                 end
