@@ -1,4 +1,4 @@
-function [del_P del_Q] = mismatch_calc(mismatch_calc_params)
+function [del_P del_Q P_calc Q_calc] = mismatch_calc(mismatch_calc_params)
 
     
     Swing_bus = mismatch_calc_params.Swing_bus;

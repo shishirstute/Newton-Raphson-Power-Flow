@@ -1,14 +1,14 @@
 % Author: Shishir Lamichhane, @Washington State University
 
-clc;
-clear all;
+%clc;
+%clear all;
 
 %% setting parameters
 
 % tolerance error for voltage and angle for consecutive values
 tol_volt = 1e-3;
 tol_ang = 1e-3;
-tap_include = 0;
+tap_include = 1;
 solver = 'full_NR'; % full_NR for full newton raphson, fast_decoupled for fast decoupled method
 %solver = 'fast_decoupled'
 %% getting data
@@ -55,7 +55,7 @@ Delta(Swing_bus) = bus_data.data(Swing_bus,5) * pi/180; % converting to radian a
 
 % maximum iterations is set as 15
 % if value converges within prescribed limit, loop will terminate
- for i=1:200
+ for i=1:10
  
      if i > 2
          max_error_volt = max(abs(Voltage_history(:,i-1)-Voltage_history(:,i-2)));
@@ -86,7 +86,7 @@ Delta(Swing_bus) = bus_data.data(Swing_bus,5) * pi/180; % converting to radian a
     mismatch_calc_params.baseMVA = baseMVA;
 
     % calling function
-    [del_P del_Q] = mismatch_calc(mismatch_calc_params);
+    [del_P del_Q P_calc Q_calc] = mismatch_calc(mismatch_calc_params);
     del_PQ = [del_P; del_Q];
 
    
@@ -141,6 +141,9 @@ Delta(Swing_bus) = bus_data.data(Swing_bus,5) * pi/180; % converting to radian a
     % calling function
     [Voltage Delta] = update_value(update_params);
  end
+
+ % plotting
+ plot_function(Voltage_history,Delta_history);
 
 
    
